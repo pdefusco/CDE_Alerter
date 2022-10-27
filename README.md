@@ -41,10 +41,10 @@ python3 -m venv venv
 source venv/bin/activate
 
 #Install single package
-pip install pandas
+pip install pandas #Optionally use pip3 install
 
 #Install requirements
-pip install requirements.txt
+pip install requirements.txt #Optionally use pip3 install
 ```
 
 #### Step 2: Run the script
@@ -56,7 +56,52 @@ Before you can run the script you will need:
   2. [Enable 2-step Authentication and Create an App Password](https://www.youtube.com/watch?v=hXiPshHn9Pw)
 * The CDP User and Password you will authenticate into the CDE Virtual Cluster with.
 
-Before you can run the script you should have the following parameters ready:
+To run the script, run the following python command in the directory where you cloned your project.
+
+```
+python3 alerter.py https://z4xgdztf.cde-6fr6l74r.go01-dem.ylcu-atmi.cloudera.site/dex/api/v1 cdpusername cdppwdhere mysecregapppwdhere 1800 me@myco.com mycolleague@myco.com
+```
+
+The Gmail App password should be entered as the fourth argument (for example replacing "mysecregapppwdhere" above).
+
+The script will automatically detect whether more than 1800 seconds (30 minutes) have expired between the start and end time of any of your CDE Jobs.
+
+If any CDE Jobs meet the criteria, the script will automatically send a notification to the provided emails. You can enter two email recipients by adding them as the last two arguments at script execution.
+
+If no CDE Jobs meet the criteria, nothing is done.
 
 
-To run the script,
+#### Step 3: Schedule the Script as a Cron Job
+
+The script can run as often as you would like. For example, you could schedule a cron job to execute the script every 5 minutes with the following command:
+
+```
+
+```
+
+
+## Conclusions & Next Steps
+
+CDE is the Cloudera Data Engineering Service, a containerized managed service for Spark and Airflow. With Python, CDE users can interact with their Virtual Clusters by means of Requests based on the CDE API and build applications for use cases including ML Ops, Web Apps, and many more.
+
+In this tutorial we triggered an email to select recipients if a certain wait time is above threshold. This pattern can be used more broadly as an integration point between CDE Jobs and 3rd party orchestration systems.
+
+If you are exploring CDE you may find the following tutorials relevant:
+
+* [Spark 3 & Iceberg](https://github.com/pdefusco/Spark3_Iceberg_CML): A quick intro of Time Travel Capabilities with Spark 3.
+
+* [Simple Intro to the CDE CLI](https://github.com/pdefusco/CDE_CLI_Simple): An introduction to the CDE CLI for the CDE beginner.
+
+* [CDE CLI Demo](https://github.com/pdefusco/CDE_CLI_demo): A more advanced CDE CLI reference with additional details for the CDE user who wants to move beyond the basics.
+
+* [CDE Resource 2 ADLS](https://github.com/pdefusco/CDEResource2ADLS): An example integration between ADLS and CDE Resource. This pattern is applicable to AWS S3 as well and can be used to pass execution scripts, dependencies, and virtually any file from CDE to 3rd party systems and viceversa.
+
+* [Using CDE Airflow](https://github.com/pdefusco/Using_CDE_Airflow): A guide to Airflow in CDE including examples to integrate with 3rd party systems via Airflow Operators such as BashOperator, HttpOperator, PythonOperator, and more.
+
+* [GitLab2CDE](https://github.com/pdefusco/Gitlab2CDE): a CI/CD pipeline to orchestrate Cross-Cluster Workflows for Hybrid/Multicloud Data Engineering.
+
+* [CML2CDE](https://github.com/pdefusco/cml2cde_api_example): an API to create and orchestrate CDE Jobs from any Python based environment including CML. Relevant for ML Ops or any Python Users who want to leverage the power of Spark in CDE via Python requests.
+
+* [Postman2CDE](https://github.com/pdefusco/Postman2CDE): An example of the Postman API to bootstrap CDE Services with the CDE API.
+
+* [Oozie2CDEAirflow API](https://github.com/pdefusco/Oozie2CDE_Migration): An API to programmatically convert Oozie workflows and dependencies into CDE Airflow and CDE Jobs. This API is designed to easily migrate from Oozie to CDE Airflow and not just Open Source Airflow.
