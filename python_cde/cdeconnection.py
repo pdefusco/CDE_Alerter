@@ -1,34 +1,34 @@
 import numpy as np
 import pandas as pd
-import os
 from os.path import exists
-import json
 import sys
 import re
-import requests
 from requests_toolbelt import MultipartEncoder
 import xmltodict as xd
 import pyparsing
+import os, json, requests
+from datetime import datetime
+import pytz
+import yagmail
 
 
 class CdeConnection:
     '''Class to establish a connection to a CDE Virtual Cluster
        and interact with it e.g. upload Spark CDE Job files'''
     
-    def __init__(self, JOBS_API_URL, WORKLOAD_USER):
+    def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD, GMAIL_APP_PASSWORD):
         self.JOBS_API_URL = JOBS_API_URL
         self.WORKLOAD_USER = WORKLOAD_USER
+        self.WORKLOAD_PASSWORD = WORKLOAD_PASSWORD
+        self.GMAIL_APP_PASSWORD = GMAIL_APP_PASSWORD
         
     # Set user token to interact with CDE Service remotely
-    def set_cde_token(self, WORKLOAD_PASSWORD):
+    def set_cde_token(self):
 
-        os.environ["JOBS_API_URL"] = self.JOBS_API_URL
-        os.environ["WORKLOAD_USER"] = self.WORKLOAD_USER
+        rep = self.JOBS_API_URL.split("/")[2].split(".")[0]
+        os.environ["GET_TOKEN_URL"] = self.JOBS_API_URL.replace(rep, "service").replace("dex/api/v1", "gateway/authtkn/knoxtoken/api/v1/token")
 
-        rep = os.environ["JOBS_API_URL"].split("/")[2].split(".")[0]
-        os.environ["GET_TOKEN_URL"] = os.environ["JOBS_API_URL"].replace(rep, "service").replace("dex/api/v1", "gateway/authtkn/knoxtoken/api/v1/token")
-
-        token_json = requests.get(os.environ["GET_TOKEN_URL"], auth=(os.environ["WORKLOAD_USER"], WORKLOAD_PASSWORD))
+        token_json = requests.get(os.environ["GET_TOKEN_URL"], auth=(self.WORKLOAD_USER, self.WORKLOAD_PASSWORD))
 
         return json.loads(token_json.text)["access_token"]
     
@@ -37,7 +37,7 @@ class CdeConnection:
 
         print("Started Creating Resource {}".format(resource_name))
         
-        url = os.environ["JOBS_API_URL"] + "/resources"
+        url = self.JOBS_API_URL + "/resources"
         myobj = {"name": str(resource_name)}
         data_to_send = json.dumps(myobj).encode("utf-8")
 
@@ -115,7 +115,7 @@ class CdeConnection:
               },
               "schedule": {
                 "enabled": False,
-                "user": os.environ["WORKLOAD_USER"] #Your CDP Workload User is automatically set by CML as an Environment Variable
+                "user": self.WORKLOAD_USER #Your CDP Workload User is automatically set by CML as an Environment Variable
               }
             }
         
@@ -125,7 +125,7 @@ class CdeConnection:
             'Content-Type': 'application/json',
         }
 
-        PUT = '{}/jobs'.format(os.environ["JOBS_API_URL"])
+        PUT = '{}/jobs'.format(self.JOBS_API_URL)
 
         data = json.dumps(cde_payload)
 
@@ -157,7 +157,7 @@ class CdeConnection:
             'Content-Type': 'application/json',
         }
 
-        POST = "{}/jobs/".format(os.environ["JOBS_API_URL"])+cde_job_name+"/run"
+        POST = "{}/jobs/".format(self.JOBS_API_URL)+cde_job_name+"/run"
 
         data = json.dumps(cde_payload)
 
@@ -170,3 +170,68 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
+            
+            
+    def list_cdejob_runs(self, token):
+        tz_LA = pytz.timezone('America/Los_Angeles') 
+        now = datetime.now(tz_LA)
+        print("Listing Jobs as of: {} PACIFIC STANDARD TIME".format(now))
+
+        url = self.JOBS_API_URL + "/job-runs"
+
+        headers = {
+            'Authorization': f"Bearer {token}",
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+
+        x = requests.get(url, headers=headers)
+
+        return x
+
+        if x.status_code == 201:
+            print("Listing Jobs {} has Succeeded".format(resource_name))
+        else:
+            print(x.status_code)
+            print(x.text)
+            
+            
+    def detect_laggers(response, job_duration_seconds=1800):
+        #Compare Start with End Dates for Current Job Runs
+        df = pd.DataFrame(response.json()['runs'])
+        df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
+        df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
+
+        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
+        laggers_df = laggers_df.reset_index()
+        
+        return laggers_df, job_duration_seconds
+    
+    
+    def detect_laggers(self, response, job_duration_seconds=1800):
+        #Compare Start with End Dates for Current Job Runs
+        df = pd.DataFrame(response.json()['runs'])
+        df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
+        df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
+
+        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
+        laggers_df = laggers_df.reset_index()
+        
+        return laggers_df, job_duration_seconds
+    
+    
+    def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
+        #Send email alerts to destination emails
+        #Destination emails is a single or multiple strings
+        yag = yagmail.SMTP('cdemachine10', self.GMAIL_APP_PASSWORD)
+        subject = 'URGENT: Potential CDE Virtual Cluster Issue Detected'
+
+        body = ''
+        minutes = str(float(job_duration_seconds)/60)
+
+        for i in range(len(laggers_df)):
+            body += '\n'
+            body += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
+                .format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+
+        yag.send(to = destination_emails[0], subject = subject, contents = body)
