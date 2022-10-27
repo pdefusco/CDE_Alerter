@@ -44,8 +44,11 @@ source venv/bin/activate
 pip install pandas #Optionally use pip3 install
 
 #Install requirements
-pip install requirements.txt #Optionally use pip3 install
+pip install -r requirements.txt #Optionally use pip3 install
 ```
+
+![alt text](img/alerter_img01.png)
+
 
 #### Step 2: Run the script
 
@@ -69,6 +72,8 @@ The script will automatically detect whether more than 1800 seconds (30 minutes)
 If any CDE Jobs meet the criteria, the script will automatically send a notification to the provided emails. You can enter two email recipients by adding them as the last two arguments at script execution.
 
 If no CDE Jobs meet the criteria, nothing is done.
+
+![alt text](img/alerter_img01.png)
 
 
 #### Step 3: Schedule the Script as a Cron Job
