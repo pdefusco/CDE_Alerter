@@ -71,17 +71,21 @@ The script will automatically detect whether more than 1800 seconds (30 minutes)
 
 If any CDE Jobs meet the criteria, the script will automatically send a notification to the provided emails. You can enter two email recipients by adding them as the last two arguments at script execution.
 
+As an example, if we lower the time window from 1800 seconds to 18 seconds the script will detect some jobs and output the following to the terminal.
+
+![alt text](img/alerter_img02A.png)
+
 If no CDE Jobs meet the criteria, nothing is done.
 
-![alt text](img/alerter_img01.png)
+![alt text](img/alerter_img02.png)
 
 
 #### Step 3: Schedule the Script as a Cron Job
 
-The script can run as often as you would like. For example, you could schedule a cron job to execute the script every 5 minutes with the following command:
+The script can run as often as you would like. For example, you could schedule a cron job to execute the script every minute with the following command:
 
 ```
-
+* * * * * /usr/bin/python ~/path/to/proj/cde_alerter/alerter.py
 ```
 
 

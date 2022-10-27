@@ -1,4 +1,5 @@
 pandas
-requests-toolbelt 
+requests-toolbelt
 xmltodict
 yagmail[all]
+pyparsing
