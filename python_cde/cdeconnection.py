@@ -1,12 +1,10 @@
 import numpy as np
 import pandas as pd
 from os.path import exists
-import sys
-import re
 from requests_toolbelt import MultipartEncoder
 import xmltodict as xd
 import pyparsing
-import os, json, requests
+import os, json, requests, re, sys
 from datetime import datetime
 import pytz
 import yagmail
@@ -15,13 +13,13 @@ import yagmail
 class CdeConnection:
     '''Class to establish a connection to a CDE Virtual Cluster
        and interact with it e.g. upload Spark CDE Job files'''
-    
+
     def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD, GMAIL_APP_PASSWORD):
         self.JOBS_API_URL = JOBS_API_URL
         self.WORKLOAD_USER = WORKLOAD_USER
         self.WORKLOAD_PASSWORD = WORKLOAD_PASSWORD
         self.GMAIL_APP_PASSWORD = GMAIL_APP_PASSWORD
-        
+
     # Set user token to interact with CDE Service remotely
     def set_cde_token(self):
 
@@ -31,12 +29,12 @@ class CdeConnection:
         token_json = requests.get(os.environ["GET_TOKEN_URL"], auth=(self.WORKLOAD_USER, self.WORKLOAD_PASSWORD))
 
         return json.loads(token_json.text)["access_token"]
-    
+
     # Create CDE Resource to upload Spark CDE Job files
     def create_cde_resource(self, token, resource_name):
 
         print("Started Creating Resource {}".format(resource_name))
-        
+
         url = self.JOBS_API_URL + "/resources"
         myobj = {"name": str(resource_name)}
         data_to_send = json.dumps(myobj).encode("utf-8")
@@ -54,7 +52,7 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
-        
+
 
     #Upload Spark CDE Job file to CDE Resource
     def upload_file(self, resource_name, job_path, file_name, token):
@@ -67,23 +65,23 @@ class CdeConnection:
             )
 
         PUT = '{jobs_api_url}/resources/{resource_name}/{file_name}'.format(jobs_api_url=os.environ["JOBS_API_URL"], resource_name=resource_name, file_name=file_name)
-        
+
         x = requests.put(PUT, data=m, headers={'Authorization': f"Bearer {token}",'Content-Type': m.content_type})
         print("Response Status Code {}".format(x.status_code))
-        
+
         if x.status_code == 201:
             print("Uploading File {0} to CDE Resource {1} has Succeeded".format(file_name, resource_name))
         else:
             print(x.status_code)
             print(x.text)
-        
-     
+
+
     def create_spark_job_from_resource(self, token, cde_job_name, CDE_RESOURCE_NAME, PYSPARK_EXAMPE_SCRIPT_NAME, spark_confs={"spark.pyspark.python": "python3"}):
 
         print("Started Creating CDE Spark Job {0} with Script {1}".format(cde_job_name, PYSPARK_EXAMPE_SCRIPT_NAME))
-         
+
         ### Any Spark Job Configuration Options (Not Mandatory) ###
-        #spark_confs_example = { 
+        #spark_confs_example = {
                   #"spark.dynamicAllocation.maxExecutors": "6",
                   #"spark.dynamicAllocation.minExecutors": "2",
                   #"spark.executor.extraJavaOptions": "-Dsun.security.krb5.debug=true -Dsun.security.spnego.debug=true",
@@ -93,8 +91,8 @@ class CdeConnection:
                   #"spark.rpc.askTimeout": "600",
                   #"spark.sql.shuffle.partitions": "48",
                   #"spark.yarn.access.hadoopFileSystems": "s3a://your_data_lake_here"
-                #}      
-        
+                #}
+
         cde_payload = {
               "name": cde_job_name,# CDE Job Name As you want it to appear in the CDE JOBS UI
               "type": "spark",
@@ -118,7 +116,7 @@ class CdeConnection:
                 "user": self.WORKLOAD_USER #Your CDP Workload User is automatically set by CML as an Environment Variable
               }
             }
-        
+
         headers = {
             'Authorization': f"Bearer {token}",
             'accept': 'application/json',
@@ -136,21 +134,21 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
-           
+
     def run_spark_job(self, token, cde_job_name, driver_cores = 2, driver_memory = "4g", executor_cores = 4, executor_memory = "4g", num_executors = 4):
-    
+
         print("Started to Submit Spark Job {}".format(cde_job_name))
 
-        cde_payload = {"overrides": 
+        cde_payload = {"overrides":
                        {"spark":
-                        {"driverCores": driver_cores, 
-                         "driverMemory": driver_memory, 
-                         "executorCores": executor_cores, 
-                         "executorMemory": executor_memory, 
+                        {"driverCores": driver_cores,
+                         "driverMemory": driver_memory,
+                         "executorCores": executor_cores,
+                         "executorMemory": executor_memory,
                          "numExecutors": num_executors}
                        }
-                      }      
-              
+                      }
+
         headers = {
             'Authorization': f"Bearer {token}",
             'accept': 'application/json',
@@ -170,10 +168,10 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
-            
-            
+
+
     def list_cdejob_runs(self, token):
-        tz_LA = pytz.timezone('America/Los_Angeles') 
+        tz_LA = pytz.timezone('America/Los_Angeles')
         now = datetime.now(tz_LA)
         print("Listing Jobs as of: {} PACIFIC STANDARD TIME".format(now))
 
@@ -194,8 +192,8 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
-            
-            
+
+
     def detect_laggers(response, job_duration_seconds=1800):
         #Compare Start with End Dates for Current Job Runs
         df = pd.DataFrame(response.json()['runs'])
@@ -204,10 +202,10 @@ class CdeConnection:
 
         laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
         laggers_df = laggers_df.reset_index()
-        
+
         return laggers_df, job_duration_seconds
-    
-    
+
+
     def detect_laggers(self, response, job_duration_seconds=1800):
         #Compare Start with End Dates for Current Job Runs
         df = pd.DataFrame(response.json()['runs'])
@@ -216,10 +214,10 @@ class CdeConnection:
 
         laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
         laggers_df = laggers_df.reset_index()
-        
+
         return laggers_df, job_duration_seconds
-    
-    
+
+
     def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
         #Send email alerts to destination emails
         #Destination emails is a single or multiple strings
