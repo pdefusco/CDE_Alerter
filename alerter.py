@@ -36,7 +36,7 @@ def main(args):
 
     if len(laggers_df)>0:
         #cde_connection.send_email_alert(laggers_df, job_duration_seconds, "pauldefusco@cloudera.com")
-        cdeconnection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP)
+        cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP)
         now = datetime.now(tz_LA)
         print("The CDE Alerter executed at {0} PACIFIC STANDARD TIME and found at least one job taking longer than {1} minutes".format(now, job_duration_seconds/60))
         print("An Email was sent to the following recipients: {0}, {1}".format(EMAIL_SENDER, EMAIL_RECIPIENT))
