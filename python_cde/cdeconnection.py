@@ -200,7 +200,7 @@ class CdeConnection:
         laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
         laggers_df = laggers_df.reset_index()
 
-        return laggers_df, job_duration_seconds
+        return laggers_df, MAX_JOB_DURATION_SECONDS
 
     #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
         #Send email alerts to destination emails
