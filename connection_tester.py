@@ -1,11 +1,7 @@
 #pip3 install -r requirements.txt
 
 import os, json, requests
-import pandas as pd
 import python_cde.cdeconnection as cde
-from datetime import datetime
-import pytz
-import yagmail
 import sys
 
 def main(args):

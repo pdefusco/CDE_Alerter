@@ -50,6 +50,14 @@ pip install -r requirements.txt #Optionally use pip3 install
 ![alt text](img/alerter_img01.png)
 
 
+#### Step 2: Test CDE Connection
+
+To test if your VM can reach the CDE Virtual Cluster, open your terminal and run the following command:
+
+```
+python3 connection_tester.py jobs_api_url cdpusername cdppassword 
+```
+
 #### Step 2: Run the script
 
 Before you can run the script you will need:
