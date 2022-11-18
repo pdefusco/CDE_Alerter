@@ -17,7 +17,7 @@ def main(args):
     # Setting variables for script
     JOBS_API_URL = args[1] #"https://z4xgdztf.cde-6fr6l74r.go01-dem.ylcu-atmi.cloudera.site/dex/api/v1"
     WORKLOAD_USER = args[2] #"cdpusername"
-    WORKLOAD_PASSWORD = args[3] #"cdppwdhere"
+    WORKLOAD_PASSWORD = args[3] #"cdppwd"
     SMTP = args[4] #"mysmtphere"
     MAX_JOB_DURATION_SECONDS = int(args[5]) #number of seconds between job start and end that qualifies the job as a lagger
     EMAIL_SENDER = args[6] #me@myco.com
