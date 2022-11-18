@@ -10,7 +10,6 @@ import sys
 
 #Execute with:
 #python3 alerter.py https://z4xgdztf.cde-6fr6l74r.go01-dem.ylcu-atmi.cloudera.site/dex/api/v1 cdpusername cdppwdhere mysmtphere 1800 me@myco.com mycolleague@myco.com
-#python3 alerter.py https://gxjqflc9.cde-q8k5xhqz.cdp-pcm.cpx9-02nn.cloudera.site/dex/api/v1 *** *** pc1relay.epsilon.com 1800 rahul-smtp-test@epsilon.com rahul.pilli@epsilon.com
 
 def main(args):
 
