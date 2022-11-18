@@ -29,6 +29,9 @@ def main(args):
 
     # Poll the CDE Virtual Cluster with Current Jobs and Determine Laggers
     response = cde_connection.list_cdejob_runs(TOKEN)
+
+    print(response)
+
     laggers_df, job_duration_seconds = cde_connection.detect_laggers(response, MAX_JOB_DURATION_SECONDS)
     tz_LA = pytz.timezone('America/Los_Angeles')
 
