@@ -15,7 +15,7 @@ class CdeConnection:
     '''Class to establish a connection to a CDE Virtual Cluster
        and interact with it e.g. upload Spark CDE Job files'''
 
-    def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD, SMTP):
+    def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD):
         self.JOBS_API_URL = JOBS_API_URL
         self.WORKLOAD_USER = WORKLOAD_USER
         self.WORKLOAD_PASSWORD = WORKLOAD_PASSWORD
