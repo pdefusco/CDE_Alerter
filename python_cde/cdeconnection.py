@@ -54,7 +54,6 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
-
     #Upload Spark CDE Job file to CDE Resource
     def upload_file(self, resource_name, job_path, file_name, token):
 
@@ -75,7 +74,6 @@ class CdeConnection:
         else:
             print(x.status_code)
             print(x.text)
-
 
     def create_spark_job_from_resource(self, token, cde_job_name, CDE_RESOURCE_NAME, PYSPARK_EXAMPE_SCRIPT_NAME, spark_confs={"spark.pyspark.python": "python3"}):
 
@@ -170,7 +168,6 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
-
     def list_cdejob_runs(self, token):
         tz_LA = pytz.timezone('America/Los_Angeles')
         now = datetime.now(tz_LA)
@@ -194,18 +191,16 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
-
-    def detect_laggers(response, job_duration_seconds=1800):
+    def detect_laggers(self, response, MAX_JOB_DURATION_SECONDS=1800):
         #Compare Start with End Dates for Current Job Runs
         df = pd.DataFrame(response.json()['runs'])
         df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
         df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
 
-        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
+        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
         laggers_df = laggers_df.reset_index()
 
         return laggers_df, job_duration_seconds
-
 
     #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
         #Send email alerts to destination emails
@@ -222,7 +217,6 @@ class CdeConnection:
                 #.format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
         #yag.send(to = destination_emails[0], subject = subject, contents = body)
-
 
     def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP):
 
