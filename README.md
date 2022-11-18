@@ -55,10 +55,13 @@ pip install -r requirements.txt #Optionally use pip3 install
 To test if your VM can reach the CDE Virtual Cluster, open your terminal and run the following command:
 
 ```
-python3 connection_tester.py jobs_api_url cdpusername cdppassword 
+python3 connection_tester.py jobs_api_url cdpusername cdppassword
 ```
 
-#### Step 2: Run the script
+The output in the terminal should confirm that a test resource has been created successfully.
+
+
+#### Step 3: Run the script
 
 Before you can run the script you will need:
 * The CDE JOBS API URL for the intended CDE Virtual Cluster you want to monitor.
@@ -88,7 +91,7 @@ If no CDE Jobs meet the criteria, nothing is done.
 ![alt text](img/alerter_img02.png)
 
 
-#### Step 3: Schedule the Script as a Cron Job
+#### Step 4: Schedule the Script as a Cron Job
 
 The script can run as often as you would like. For example, you could schedule a cron job to execute the script every minute with the following command:
 
