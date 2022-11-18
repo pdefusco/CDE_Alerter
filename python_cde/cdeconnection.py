@@ -7,6 +7,7 @@ import pyparsing
 import os, json, requests, re, sys
 from datetime import datetime
 import pytz
+import smtplib
 import yagmail
 
 
@@ -14,11 +15,11 @@ class CdeConnection:
     '''Class to establish a connection to a CDE Virtual Cluster
        and interact with it e.g. upload Spark CDE Job files'''
 
-    def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD, GMAIL_APP_PASSWORD):
+    def __init__(self, JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD, SMTP):
         self.JOBS_API_URL = JOBS_API_URL
         self.WORKLOAD_USER = WORKLOAD_USER
         self.WORKLOAD_PASSWORD = WORKLOAD_PASSWORD
-        self.GMAIL_APP_PASSWORD = GMAIL_APP_PASSWORD
+        #self.GMAIL_APP_PASSWORD = GMAIL_APP_PASSWORD
 
     # Set user token to interact with CDE Service remotely
     def set_cde_token(self):
@@ -206,30 +207,45 @@ class CdeConnection:
         return laggers_df, job_duration_seconds
 
 
-    def detect_laggers(self, response, job_duration_seconds=1800):
-        #Compare Start with End Dates for Current Job Runs
-        df = pd.DataFrame(response.json()['runs'])
-        df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
-        df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
-
-        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > job_duration_seconds]
-        laggers_df = laggers_df.reset_index()
-
-        return laggers_df, job_duration_seconds
-
-
-    def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
+    #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
         #Send email alerts to destination emails
         #Destination emails is a single or multiple strings
-        yag = yagmail.SMTP('cdemachine10', self.GMAIL_APP_PASSWORD)
-        subject = 'URGENT: Potential CDE Virtual Cluster Issue Detected'
+        #yag = yagmail.SMTP('cdemachine10', self.GMAIL_APP_PASSWORD)
+        #subject = 'URGENT: Potential CDE Virtual Cluster Issue Detected'
 
-        body = ''
+        #body = ''
+        #minutes = str(float(job_duration_seconds)/60)
+
+        #for i in range(len(laggers_df)):
+            #body += '\n'
+            #body += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
+                #.format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+
+        #yag.send(to = destination_emails[0], subject = subject, contents = body)
+
+
+    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP):
+
         minutes = str(float(job_duration_seconds)/60)
+        message = """From: {0}
+
+        To: {1}
+
+        Subject: URGENT CDE Virtual Cluster Alert!
+
+        This is an alert related to your CDE Service.
+
+        """.format(sender, receiver)
 
         for i in range(len(laggers_df)):
-            body += '\n'
-            body += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
+            message += '\n'
+            message += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
                 .format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
-        yag.send(to = destination_emails[0], subject = subject, contents = body)
+        try:
+           smtpObj = smtplib.SMTP(SMTP)
+           smtpObj.sendmail(sender, receiver, message)
+           print("Successfully sent email")
+
+        except smtplib.SMTPException:
+           print("Error: unable to send email")
