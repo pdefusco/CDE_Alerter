@@ -8,7 +8,7 @@ import sys
 import argparse
 
 #Execute with:
-#python3 alerter.py https://z4xgdztf.cde-6fr6l74r.go01-dem.ylcu-atmi.cloudera.site/dex/api/v1 cdpusername cdppwdhere mysmtphere 1800 me@myco.com mycolleague@myco.com
+#python3 parsing.py --clusters clusters.txt cdpusername cdppwd mysmtpserver 1800 me@myco.com you@myco.com
 
 def parse_args():
 
