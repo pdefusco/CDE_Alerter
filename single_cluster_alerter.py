@@ -5,7 +5,7 @@ import pandas as pd
 import python_cde.cdeconnection as cde
 from datetime import datetime
 import pytz
-import yagmail
+#import yagmail
 import sys
 
 #Execute with:
@@ -34,13 +34,11 @@ def main(args):
     tz_LA = pytz.timezone('America/Los_Angeles')
 
     if len(laggers_df)>0:
-        #cde_connection.send_email_alert(laggers_df, job_duration_seconds, "pauldefusco@cloudera.com")
         cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP)
         now = datetime.now(tz_LA)
         print("The CDE Alerter executed at {0} PACIFIC STANDARD TIME and found at least one job taking longer than {1} minutes".format(now, job_duration_seconds/60))
         print("An Email was sent to the following recipients: {0}, {1}".format(EMAIL_SENDER, EMAIL_RECIPIENT))
     else:
-        tz_SD = pytz.timezone('America/Los_Angeles')
         now = datetime.now(tz_LA)
         print("The CDE Alerter executed at {0} PACIFIC STANDARD TIME and found no jobs taking longer than {1} minutes".format(now, job_duration_seconds/60))
 

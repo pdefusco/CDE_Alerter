@@ -191,6 +191,25 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
+
+    def print_vc_meta(self, token):
+
+        headers = {
+            'Authorization': f"Bearer {token}",
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            }
+
+        x = requests.get(JOBS_API_URL+'/info', headers=headers)
+        cde_vc_name = json.loads(x.text)["appName"]
+        cde_vc_id = json.loads(x.text)["appId"]
+        cde_vc_console_url = json.loads(x.text)["cdeConsoleURL"]
+        cde_cluster_id = json.loads(x.text)["clusterID"]
+        cde_version = json.loads(x.text)["version"]
+
+        return cde_vc_name, cde_vc_id, cde_vc_console_url, cde_cluster_id, cde_version
+
+
     def detect_laggers(self, response, MAX_JOB_DURATION_SECONDS=1800):
         #Compare Start with End Dates for Current Job Runs
         df = pd.DataFrame(response.json()['runs'])
@@ -218,7 +237,7 @@ class CdeConnection:
 
         #yag.send(to = destination_emails[0], subject = subject, contents = body)
 
-    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP):
+    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name, cde_vc_id, cde_vc_console_url):
 
         minutes = str(float(job_duration_seconds)/60)
         message = """From: {0}
@@ -227,9 +246,11 @@ class CdeConnection:
 
         Subject: URGENT CDE Virtual Cluster Alert!
 
-        This is an alert related to your CDE Service.
+        This is an alert related to CDE Virtual Cluster {2} - ID {3}.
 
-        """.format(sender, receiver)
+        Please check Cluster Status at the follwoing URL: {4}
+
+        """.format(sender, receiver, cde_vc_name, cde_vc_id, cde_vc_console_url)
 
         for i in range(len(laggers_df)):
             message += '\n'
