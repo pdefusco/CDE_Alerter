@@ -8,7 +8,7 @@ import sys
 import argparse
 
 #Execute with:
-#python3 parsing.py --clusters clusters.txt cdpusername cdppwd mysmtpserver 1800 me@myco.com you@myco.com
+#python3 multi_cluster_alerter.py --clusters clusters.txt cdpusername cdppwd mysmtpserver 1800 me@myco.com you@myco.com
 
 def parse_args():
 
