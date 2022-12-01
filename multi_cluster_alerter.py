@@ -14,20 +14,13 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="My program!", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--clusters", type=argparse.FileType('r'), help="Filename to be passed")
-    parser.add_argument("cdp_user", type=str,
-                        help="enter the cdp workload user")
-    parser.add_argument("cdp_password", type=str,
-                            help="enter the cdp workload password")
-    parser.add_argument("smtp", type=str,
-                        help="enter the smtp server")
-    parser.add_argument("max_job_seconds", type=int,
-                            help="enter the max job duration in seconds to qualify a lagger job")
-    parser.add_argument("email_sender", type=str,
-                        help="enter the notification email sender")
-    parser.add_argument("email_recipient", type=str,
-                            help="enter the notification email recipient")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="increase output verbosity")
+    parser.add_argument("cdp_user", type=str, help="enter the cdp workload user")
+    parser.add_argument("cdp_password", type=str, help="enter the cdp workload password")
+    parser.add_argument("smtp", type=str, help="enter the smtp server")
+    parser.add_argument("max_job_seconds", type=int, help="enter the max job duration in seconds to qualify a lagger job")
+    parser.add_argument("email_sender", type=str, help="enter the notification email sender")
+    parser.add_argument("email_recipient", type=str, help="enter the notification email recipient")
+    parser.add_argument("-v", "--verbose", action="store_true", help="increase output verbosity")
     args = vars(parser.parse_args())
 
     return args
@@ -57,24 +50,22 @@ def main():
         tz_LA = pytz.timezone('America/Los_Angeles')
 
         if len(laggers_df)>0:
-            #cde_connection.send_email_alert(laggers_df, job_duration_seconds, "pauldefusco@cloudera.com")
-            #cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP)
             now = datetime.now(tz_LA)
-            cde_vc_name, cde_vc_id, cde_vc_console_url, cde_cluster_id, cde_version = cde_connection.print_vc_meta(TOKEN)
-            cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP, cde_vc_name, cde_vc_id, cde_vc_console_url)
+            cde_vc_name = cde_connection.print_vc_meta(TOKEN)
+            cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP, cde_vc_name)
             print("{} PACIFIC STANDARD TIME".format(now))
-            print("Executing CDE Alerter for CDE Virtual Cluster {0} - ID: {1}".format(cde_vc_name, cde_vc_id))
+            print("Executing CDE Alerter for CDE Virtual Cluster {}".format(cde_vc_name))
             print("The CDE Alerter found at least one job taking longer than {1} minutes".format(job_duration_seconds/60))
             print("An Email notification was sent to the following recipients: {0}, {1}".format(EMAIL_SENDER, EMAIL_RECIPIENT))
-            print("Please visit the CDE Console at the following URL: ".format(cde_vc_console_url))
             print("\n")
         else:
             tz_SD = pytz.timezone('America/Los_Angeles')
             now = datetime.now(tz_LA)
+            cde_vc_name = cde_connection.print_vc_meta(TOKEN)
             print("{} PACIFIC STANDARD TIME".format(now))
-            #print("Executing CDE Alerter for CDE Virtual Cluster {0} - ID: {1}".format(cde_vc_name, cde_vc_id))
+            print("Executing CDE Alerter for CDE Virtual Cluster {0}".format(cde_vc_name))
             print("The CDE Alerter found no jobs taking longer than {} minutes".format(job_duration_seconds/60))
-            print("No Email notification was sent")
+            print("No Email notification sent")
             print("\n")
 
 if __name__ == '__main__':

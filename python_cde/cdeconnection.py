@@ -181,7 +181,7 @@ class CdeConnection:
             'Content-Type': 'application/json',
         }
 
-        x = requests.get(url, headers=headers)
+        x = requests.get(url+'?limit=100&offset=0&orderby=ID&orderasc=false', headers=headers)
 
         return x
 
@@ -202,12 +202,12 @@ class CdeConnection:
 
         x = requests.get(self.JOBS_API_URL+'/info', headers=headers)
         cde_vc_name = json.loads(x.text)["appName"]
-        cde_vc_id = json.loads(x.text)["appId"]
-        cde_vc_console_url = json.loads(x.text)["cdeConsoleURL"]
-        cde_cluster_id = json.loads(x.text)["clusterID"]
-        cde_version = json.loads(x.text)["version"]
+        #cde_vc_id = json.loads(x.text)["appId"]
+        #cde_vc_console_url = json.loads(x.text)["cdeConsoleURL"]
+        #cde_cluster_id = json.loads(x.text)["clusterID"]
+        #cde_version = json.loads(x.text)["version"]
 
-        return cde_vc_name, cde_vc_id, cde_vc_console_url, cde_cluster_id, cde_version
+        return cde_vc_name
 
 
     def detect_laggers(self, response, MAX_JOB_DURATION_SECONDS=1800):
@@ -237,7 +237,7 @@ class CdeConnection:
 
         #yag.send(to = destination_emails[0], subject = subject, contents = body)
 
-    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name, cde_vc_id, cde_vc_console_url):
+    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
 
         minutes = str(float(job_duration_seconds)/60)
         message = """From: {0}
@@ -246,16 +246,16 @@ class CdeConnection:
 
         Subject: URGENT CDE Virtual Cluster Alert!
 
-        This is an alert related to CDE Virtual Cluster {2} - ID {3}.
+        This is an alert related to CDE Virtual Cluster {2}
 
-        Please check Cluster Status at the follwoing URL: {4}
-
-        """.format(sender, receiver, cde_vc_name, cde_vc_id, cde_vc_console_url)
+        """.format(sender, receiver, cde_vc_name)
 
         for i in range(len(laggers_df)):
-            message += '\n'
-            message += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
-                .format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+            message += """
+
+            Run ID {0} of CDE Job {1} owned by User {2} has been in {3} Status for more than {4} minutes
+
+            """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
         try:
            smtpObj = smtplib.SMTP(SMTP)
