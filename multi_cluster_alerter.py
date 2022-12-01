@@ -43,7 +43,7 @@ def main():
         TOKEN = cde_connection.set_cde_token()
 
         # Poll the CDE Virtual Cluster with Current Jobs and Determine Laggers
-        response = cde_connection.list_cdejob_runs(TOKEN)
+        response = cde_connection.list_cde_job_runs(TOKEN)
         print(response.status_code)
 
         laggers_df, job_duration_seconds = cde_connection.detect_laggers(response, MAX_JOB_DURATION_SECONDS)
