@@ -168,7 +168,7 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
-    def list_cdejob_runs(self, token):
+    def list_cde_job_runs(self, token):
         tz_LA = pytz.timezone('America/Los_Angeles')
         now = datetime.now(tz_LA)
         print("Listing Jobs as of: {} PACIFIC STANDARD TIME".format(now))
@@ -191,7 +191,6 @@ class CdeConnection:
             print(x.status_code)
             print(x.text)
 
-
     def print_vc_meta(self, token):
 
         headers = {
@@ -209,14 +208,17 @@ class CdeConnection:
 
         return cde_vc_name
 
-
-    def detect_laggers(self, response, MAX_JOB_DURATION_SECONDS=1800):
+    def detect_laggers(response, MAX_JOB_DURATION_SECONDS=1800):
         #Compare Start with End Dates for Current Job Runs
+        tz_LA = pytz.timezone('America/Los_Angeles')
+        now = datetime.now(tz_LA)
+
         df = pd.DataFrame(response.json()['runs'])
         df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
         df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
 
-        laggers_df = df[(df['ended'] - df['started']).dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
+        df["timedelta"] = df['started'] - pd.Timestamp(now).to_datetime64()
+        laggers_df = df[-df["timedelta"].dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
         laggers_df = laggers_df.reset_index()
 
         return laggers_df, MAX_JOB_DURATION_SECONDS
