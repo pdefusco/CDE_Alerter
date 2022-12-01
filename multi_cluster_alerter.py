@@ -72,7 +72,7 @@ def main():
             tz_SD = pytz.timezone('America/Los_Angeles')
             now = datetime.now(tz_LA)
             print("{} PACIFIC STANDARD TIME".format(now))
-            print("Executing CDE Alerter for CDE Virtual Cluster {0} - ID: {1}".format(cde_vc_name, cde_vc_id))
+            #print("Executing CDE Alerter for CDE Virtual Cluster {0} - ID: {1}".format(cde_vc_name, cde_vc_id))
             print("The CDE Alerter found no jobs taking longer than {1} minutes".format(now, job_duration_seconds/60))
             print("No Email notification was sent")
             print("\n")
