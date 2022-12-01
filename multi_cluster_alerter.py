@@ -55,7 +55,7 @@ def main():
             cde_connection.smtplib_email_alert(laggers_df, job_duration_seconds, EMAIL_SENDER, EMAIL_RECIPIENT, SMTP, cde_vc_name)
             print("{} PACIFIC STANDARD TIME".format(now))
             print("Executing CDE Alerter for CDE Virtual Cluster {}".format(cde_vc_name))
-            print("The CDE Alerter found at least one job taking longer than {1} minutes".format(job_duration_seconds/60))
+            print("The CDE Alerter found at least one job taking longer than {} minutes".format(job_duration_seconds/60))
             print("An Email notification was sent to the following recipients: {0}, {1}".format(EMAIL_SENDER, EMAIL_RECIPIENT))
             print("\n")
         else:

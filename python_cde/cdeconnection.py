@@ -253,7 +253,7 @@ class CdeConnection:
         for i in range(len(laggers_df)):
             message += """
 
-            Run ID {0} of CDE Job {1} owned by User {2} has been in {3} Status for more than {4} minutes
+            Run ID {0} of CDE Job {1} owned by User {2} has run for more than {4} minutes and is now in {3} Status.
 
             """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
