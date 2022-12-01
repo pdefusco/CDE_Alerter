@@ -208,7 +208,7 @@ class CdeConnection:
 
         return cde_vc_name
 
-    def detect_laggers(response, MAX_JOB_DURATION_SECONDS=1800):
+    def detect_laggers(self, response, MAX_JOB_DURATION_SECONDS=1800):
         #Compare Start with End Dates for Current Job Runs
         tz_LA = pytz.timezone('America/Los_Angeles')
         now = datetime.now(tz_LA)
