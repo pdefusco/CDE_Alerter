@@ -200,7 +200,7 @@ class CdeConnection:
             'Content-Type': 'application/json',
             }
 
-        x = requests.get(JOBS_API_URL+'/info', headers=headers)
+        x = requests.get(self.JOBS_API_URL+'/info', headers=headers)
         cde_vc_name = json.loads(x.text)["appName"]
         cde_vc_id = json.loads(x.text)["appId"]
         cde_vc_console_url = json.loads(x.text)["cdeConsoleURL"]
