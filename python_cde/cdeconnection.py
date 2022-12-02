@@ -215,10 +215,9 @@ class CdeConnection:
 
         df = pd.DataFrame(response.json()['runs'])
         df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
-        df['ended'] = pd.to_datetime(df['ended'],infer_datetime_format=True)
-
         df["timedelta"] = df['started'] - pd.Timestamp(now).to_datetime64()
         laggers_df = df[-df["timedelta"].dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
+        laggers_df = laggers_df[(laggers_df["status"] == "running") | (laggers_df["status"] == "starting")]
         laggers_df = laggers_df.reset_index()
 
         return laggers_df, MAX_JOB_DURATION_SECONDS
