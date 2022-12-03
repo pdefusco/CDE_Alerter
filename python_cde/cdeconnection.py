@@ -214,13 +214,25 @@ class CdeConnection:
         now = datetime.now(tz_LA)
 
         df = pd.DataFrame(response.json()['runs'])
-        df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
+        df['started'] = pd.to_datetime(df['started'], infer_datetime_format=True)
         df["timedelta"] = df['started'] - pd.Timestamp(now).to_datetime64()
         laggers_df = df[-df["timedelta"].dt.total_seconds() > MAX_JOB_DURATION_SECONDS]
         laggers_df = laggers_df[(laggers_df["status"] == "running") | (laggers_df["status"] == "starting")]
         laggers_df = laggers_df.reset_index()
 
         return laggers_df, MAX_JOB_DURATION_SECONDS
+
+
+    def print_runs(self, response):
+        #Compare Start with End Dates for Current Job Runs
+        tz_LA = pytz.timezone('America/Los_Angeles')
+        now = datetime.now(tz_LA)
+
+        df = pd.DataFrame(response.json()['runs'])
+        df['started'] = pd.to_datetime(df['started'],infer_datetime_format=True)
+        df["timedelta"] = df['started'] - pd.Timestamp(now).to_datetime64()
+
+        return df
 
     #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
         #Send email alerts to destination emails
