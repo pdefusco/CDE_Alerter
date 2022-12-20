@@ -10,6 +10,8 @@ import pytz
 import smtplib
 import yagmail
 
+import email, ssl
+
 
 class CdeConnection:
     '''Class to establish a connection to a CDE Virtual Cluster
@@ -249,7 +251,7 @@ class CdeConnection:
                 #.format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
         #yag.send(to = destination_emails[0], subject = subject, contents = body)
-
+'''
     def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
 
         minutes = str(float(job_duration_seconds)/60)
@@ -273,6 +275,41 @@ class CdeConnection:
         try:
            smtpObj = smtplib.SMTP(SMTP)
            smtpObj.sendmail(sender, receiver, message)
+           print("Successfully sent email")
+
+        except smtplib.SMTPException:
+           print("Error: unable to send email")
+'''
+
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
+
+        minutes = str(float(job_duration_seconds)/60)
+
+        subject = "CDE Alerter Warning - Potential Issue Found in {}".format(cde_vc_name)
+        body = ""
+
+        for i in range(len(laggers_df)):
+            body += """
+
+            Run ID {0} of CDE Job {1} owned by User {2} has run for more than {4} minutes and is now in {3} Status.
+
+            """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+
+
+        # Create a multipart message and set headers
+        message = MIMEMultipart()
+        message["From"] = sender
+        message["To"] = receiver
+        message["Subject"] = subject
+
+        try:
+           smtpObj = smtplib.SMTP(SMTP)
+           smtpObj.sendmail(sender, receiver, message.as_string())
            print("Successfully sent email")
 
         except smtplib.SMTPException:
