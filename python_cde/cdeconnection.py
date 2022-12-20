@@ -11,6 +11,10 @@ import smtplib
 import yagmail
 
 import email, ssl
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class CdeConnection:
@@ -281,11 +285,6 @@ class CdeConnection:
            print("Error: unable to send email")
 '''
 
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
     def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
 
         minutes = str(float(job_duration_seconds)/60)
@@ -300,6 +299,8 @@ from email.mime.text import MIMEText
 
             """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
+        # Add body to email
+        message.attach(MIMEText(body, "plain"))
 
         # Create a multipart message and set headers
         message = MIMEMultipart()
