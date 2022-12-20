@@ -253,14 +253,14 @@ class CdeConnection:
 
             """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
 
-        # Add body to email
-        message.attach(MIMEText(body, "plain"))
-
         # Create a multipart message and set headers
         message = MIMEMultipart()
         message["From"] = sender
         message["To"] = receiver
         message["Subject"] = subject
+
+        # Add body to email
+        message.attach(MIMEText(body, "plain"))
 
         try:
            smtpObj = smtplib.SMTP(SMTP)
