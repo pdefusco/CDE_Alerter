@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument("smtp", type=str, help="enter the smtp server")
     parser.add_argument("max_job_seconds", type=int, help="enter the max job duration in seconds to qualify a lagger job")
     parser.add_argument("email_sender", type=str, help="enter the notification email sender")
-    parser.add_argument("email_recipient", type=str, help="enter the notification email recipient")
+    #parser.add_argument("email_recipient", type=str, help="enter the notification email recipient")
     parser.add_argument("-v", "--verbose", action="store_true", help="increase output verbosity")
     args = vars(parser.parse_args())
 
@@ -34,11 +34,15 @@ def main():
     WORKLOAD_PASSWORD = args["cdp_password"] #"cdppwd"
     MAX_JOB_DURATION_SECONDS = args["max_job_seconds"] #number of seconds between job start and end that qualifies the job as a lagger
     EMAIL_SENDER = args["email_sender"] #me@myco.com
-    EMAIL_RECIPIENT = args["email_recipient"] #mycolleague@myco.com
+    #EMAIL_RECIPIENT = args["email_recipient"] #mycolleague@myco.com
     SMTP = args["smtp"] #"mysmtphere"
 
-    for JOBS_API_URL in CLUSTERS:
+    for CLUSTER in CLUSTERS:
     # Instantiate the Connection to CDE
+
+        JOBS_API_URL = CLUSTER.split(" ")[0]
+        EMAIL_RECIPIENT = CLUSTER.split(" ")[1]
+
         cde_connection = cde.CdeConnection(JOBS_API_URL, WORKLOAD_USER, WORKLOAD_PASSWORD)
         TOKEN = cde_connection.set_cde_token()
 
