@@ -228,7 +228,6 @@ class CdeConnection:
 
         return laggers_df, MAX_JOB_DURATION_SECONDS
 
-
     def print_runs(self, response):
         #Compare Start with End Dates for Current Job Runs
         tz_LA = pytz.timezone('America/Los_Angeles')
@@ -239,51 +238,6 @@ class CdeConnection:
         df["timedelta"] = df['started'] - pd.Timestamp(now).to_datetime64()
 
         return df
-
-    #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
-        #Send email alerts to destination emails
-        #Destination emails is a single or multiple strings
-        #yag = yagmail.SMTP('cdemachine10', self.GMAIL_APP_PASSWORD)
-        #subject = 'URGENT: Potential CDE Virtual Cluster Issue Detected'
-
-        #body = ''
-        #minutes = str(float(job_duration_seconds)/60)
-
-        #for i in range(len(laggers_df)):
-            #body += '\n'
-            #body += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
-                #.format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
-
-        #yag.send(to = destination_emails[0], subject = subject, contents = body)
-'''
-    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
-
-        minutes = str(float(job_duration_seconds)/60)
-        message = """From: {0}
-
-        To: {1}
-
-        Subject: URGENT CDE Virtual Cluster Alert!
-
-        This is an alert related to CDE Virtual Cluster {2}
-
-        """.format(sender, receiver, cde_vc_name)
-
-        for i in range(len(laggers_df)):
-            message += """
-
-            Run ID {0} of CDE Job {1} owned by User {2} has run for more than {4} minutes and is now in {3} Status.
-
-            """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
-
-        try:
-           smtpObj = smtplib.SMTP(SMTP)
-           smtpObj.sendmail(sender, receiver, message)
-           print("Successfully sent email")
-
-        except smtplib.SMTPException:
-           print("Error: unable to send email")
-'''
 
     def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
 
@@ -315,3 +269,47 @@ class CdeConnection:
 
         except smtplib.SMTPException:
            print("Error: unable to send email")
+
+    #def send_email_alert(self, laggers_df, job_duration_seconds, *destination_emails):
+        #Send email alerts to destination emails
+        #Destination emails is a single or multiple strings
+        #yag = yagmail.SMTP('cdemachine10', self.GMAIL_APP_PASSWORD)
+        #subject = 'URGENT: Potential CDE Virtual Cluster Issue Detected'
+
+        #body = ''
+        #minutes = str(float(job_duration_seconds)/60)
+
+        #for i in range(len(laggers_df)):
+            #body += '\n'
+            #body += 'Job {0} owned by User {1} has been in {2} Status for more than {3} minutes'\
+                #.format(laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+
+        #yag.send(to = destination_emails[0], subject = subject, contents = body)
+
+#    def smtplib_email_alert(self, laggers_df, job_duration_seconds, sender, receiver, SMTP, cde_vc_name):
+#
+#        minutes = str(float(job_duration_seconds)/60)
+#        message = """From: {0}
+#
+#        To: {1}
+#
+#        Subject: URGENT CDE Virtual Cluster Alert!
+#
+#        This is an alert related to CDE Virtual Cluster {2}
+#
+#        """.format(sender, receiver, cde_vc_name)
+#
+#        for i in range(len(laggers_df)):
+#            message += """
+#
+#            Run ID {0} of CDE Job {1} owned by User {2} has run for more than {4} minutes and is now in {3} Status.
+#
+#            """.format(laggers_df['id'][i], laggers_df['job'][i], laggers_df['user'][i], laggers_df['status'][i], minutes)
+#
+#        try:
+#           smtpObj = smtplib.SMTP(SMTP)
+#           smtpObj.sendmail(sender, receiver, message)
+#           print("Successfully sent email")
+#
+#        except smtplib.SMTPException:
+#           print("Error: unable to send email")
